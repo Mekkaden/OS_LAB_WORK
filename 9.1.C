@@ -47,7 +47,7 @@ int main(void){
             currenttime = p[i].at;   
         }
         //in fcfs start time = current time
-        p[i].ct = currenttime + p[i].bt; //bro completion time is literally start time (here current time)
+        p[i].ct = currenttime + p[i].bt;
         p[i].tat = p[i].ct - p[i].at;
         p[i].wt = p[i].tat - p[i].bt;
 

@@ -53,22 +53,25 @@ int main()
         }
     }
 
-    int currenttime = 0;
     int total_wt = 0;
     int total_tat = 0;
 
-    for(int i = 0; i < n; i++)
+    // First process starts at time 0
+    p[0].st = 0;
+    p[0].wt = 0;
+    p[0].ct = p[0].bt;
+    p[0].tat = p[0].ct;   // since arrival time = 0;    
+
+    total_wt += p[0].wt;
+    total_tat += p[0].tat;
+
+    // Remaining processes
+    for(int i = 1; i < n; i++)
     {
-        // Handle CPU idle case
-        if(currenttime < p[i].at)
-            currenttime = p[i].at;
-
-        p[i].st = currenttime;
+        p[i].st = p[i-1].ct;
+        p[i].wt = p[i].st;
         p[i].ct = p[i].st + p[i].bt;
-        p[i].tat = p[i].ct - p[i].at;
-        p[i].wt = p[i].tat - p[i].bt;
-
-        currenttime = p[i].ct;
+        p[i].tat = p[i].ct;
 
         total_wt += p[i].wt;
         total_tat += p[i].tat;
@@ -92,17 +95,6 @@ int main()
                p[i].st,
                p[i].ct);
     }
-
-    printf("\nGantt Chart:\n");
-    for(int i = 0; i < n; i++)
-    {
-        printf("P%d (%d - %d)  ",
-               p[i].pid,
-               p[i].st,
-               p[i].ct);
-    }
-
-    printf("\n");
 
     printf("\nAverage Waiting Time = %.2f\n", avg_wt);
     printf("Average Turnaround Time = %.2f\n", avg_tat);
