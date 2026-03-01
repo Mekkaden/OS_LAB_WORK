@@ -1,9 +1,8 @@
-#include <stdio.h>
-#include <limits.h>   // For large initial value
+#include <stdio.h>   // Standard input/output library
 
-// Define structure
-struct Process
-{
+// -------- Structure Definition --------
+// Stores information of each process
+struct process {
     int pid;   // Process ID
     int at;    // Arrival Time
     int bt;    // Burst Time
@@ -13,109 +12,124 @@ struct Process
     int wt;    // Waiting Time
 };
 
+// Global array to store processes
+struct process p[100];
+
+
+// -------- Function to Print Results --------
+void print_process(struct process p[100], int n)
+{
+    int i;
+    int total_wt = 0, total_tat = 0;
+    float avg_wt, avg_tat;
+
+    printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
+
+    // Print details of each process
+    for (i = 0; i < n; i++)
+    {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
+               p[i].pid, p[i].at, p[i].bt,
+               p[i].ct, p[i].tat, p[i].wt);
+
+        total_wt += p[i].wt;
+        total_tat += p[i].tat;
+    }
+
+    // Calculate averages
+    avg_wt = (float) total_wt / n;
+    avg_tat = (float) total_tat / n;
+
+    printf("\nAverage Waiting Time = %.2f", avg_wt);
+    printf("\nAverage Turnaround Time = %.2f\n", avg_tat);
+}
+
+
+// -------- SRTF Scheduling Function --------
+void srtf(struct process p[100], int n)
+{
+    int time = 0;        // Current CPU time
+    int completed = 0;   // Count of completed processes
+    int i, j;
+    struct process temp; // Used for swapping
+
+    // Continue until all processes finish
+    while (completed < n)
+    {
+        // -------- Sort arrived processes by remaining time --------
+        // This ensures smallest remaining time process runs first
+        for (i = 0; i < n - 1; i++)
+        {
+            for (j = 0; j < n - i - 1; j++)
+            {
+                if (p[j].at <= time &&
+                    p[j + 1].at <= time &&
+                    p[j].rt > p[j + 1].rt)
+                {
+                    temp = p[j];
+                    p[j] = p[j + 1];
+                    p[j + 1] = temp;
+                }
+            }
+        }
+
+        // -------- Execute process --------
+        for (i = 0; i < n; i++)
+        {
+            // Choose first arrived process with remaining time
+            if (p[i].at <= time && p[i].rt > 0)
+            {
+                p[i].rt--;  // Run process for 1 time unit
+
+                // If process finishes
+                if (p[i].rt == 0)
+                {
+                    completed++;          // Increase finished count
+                    p[i].ct = time + 1;   // Completion time
+
+                    // Turnaround Time
+                    p[i].tat = p[i].ct - p[i].at;
+
+                    // Waiting Time
+                    p[i].wt = p[i].tat - p[i].bt;
+                }
+                break;   // Only one process runs at a time
+            }
+        }
+
+        time++;  // Increase CPU time
+    }
+
+    // Print final table
+    print_process(p, n);
+}
+
+
+// -------- Main Function --------
 int main()
 {
-    int n;
+    int n, i;
 
     printf("Enter number of processes: ");
     scanf("%d", &n);
 
-    struct Process p[n];
-
     // Input process details
-    for(int i = 0; i < n; i++)
+    for (i = 0; i < n; i++)
     {
-        printf("\nProcess %d\n", i + 1);
+        p[i].pid = i + 1;
 
-        printf("Enter Process ID: ");
-        scanf("%d", &p[i].pid);
-
-        printf("Enter Arrival Time: ");
+        printf("Enter arrival time of process %d: ", i + 1);
         scanf("%d", &p[i].at);
 
-        printf("Enter Burst Time: ");
+        printf("Enter burst time of process %d: ", i + 1);
         scanf("%d", &p[i].bt);
 
-        p[i].rt = p[i].bt;   // Initially remaining time = burst time
+        // Initially remaining time = burst time
+        p[i].rt = p[i].bt;
     }
 
-    int completed = 0;      // Count of completed processes
-    int current_time = 0;   // Current time
-    int min_index;          // Index of shortest job
-    int total_wt = 0;
-    int total_tat = 0;
-
-    printf("\nGantt Chart:\n");
-
-    // Run until all processes are completed
-    while(completed != n)
-    {
-        int min_rt = INT_MAX;   // Large initial value
-        min_index = -1;
-
-        // Find process with minimum remaining time
-        for(int i = 0; i < n; i++)
-        {
-            if(p[i].at <= current_time &&   // Arrived
-               p[i].rt > 0 &&               // Not finished
-               p[i].rt < min_rt)            // Smallest remaining time
-            {
-                min_rt = p[i].rt;
-                min_index = i;
-            }
-        }
-
-        // If no process available at this time
-        if(min_index == -1)
-        {
-            current_time++;   // CPU idle
-            continue;
-        }
-
-        // Execute process for 1 unit time
-        printf("P%d (%d - %d)  ",
-               p[min_index].pid,
-               current_time,
-               current_time + 1);
-
-        p[min_index].rt--;      // Reduce remaining time
-        current_time++;         // Increase time
-
-        // If process finishes
-        if(p[min_index].rt == 0)
-        {
-            completed++;
-
-            p[min_index].ct = current_time;              // Completion Time
-            p[min_index].tat = p[min_index].ct - p[min_index].at;  // TAT
-            p[min_index].wt = p[min_index].tat - p[min_index].bt;  // WT
-
-            total_wt += p[min_index].wt;
-            total_tat += p[min_index].tat;
-        }
-    }
-
-    printf("\n\n");
-
-    // Print final table
-    printf("PID\tAT\tBT\tCT\tTAT\tWT\n");
-
-    for(int i = 0; i < n; i++)
-    {
-        printf("%d\t%d\t%d\t%d\t%d\t%d\n",
-               p[i].pid,
-               p[i].at,
-               p[i].bt,
-               p[i].ct,
-               p[i].tat,
-               p[i].wt);
-    }
-
-    float avg_wt = (float) total_wt / n;
-    float avg_tat = (float) total_tat / n;
-
-    printf("\nAverage Waiting Time = %.2f\n", avg_wt);
-    printf("Average Turnaround Time = %.2f\n", avg_tat);
+    // Call SRTF scheduling
+    srtf(p, n);
 
     return 0;
 }

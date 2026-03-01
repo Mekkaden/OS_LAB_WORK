@@ -1,0 +1,96 @@
+AIM
+To implement Banker’s Algorithm to determine whether the system is in a safe state and to find the safe sequence. Also to simulate the Resource Request Algorithm.
+
+ALGORITHM
+
+PART A – SAFETY ALGORITHM
+
+Step 1: Input
+
+Read number of processes n
+
+Read number of resource types m
+
+Read Allocation matrix Allocation[n][m]
+
+Read Maximum matrix Max[n][m]
+
+Read Available vector Available[m]
+
+Step 2: Calculate Need Matrix
+For each process i and each resource j:
+
+Need[i][j] = Max[i][j] – Allocation[i][j]
+
+Step 3: Initialize
+
+Set Work[j] = Available[j] for all resources
+
+Set Finish[i] = false for all processes
+
+Set count = 0
+
+Step 4: Find Safe Sequence
+Repeat while count < n
+
+Set found = false
+
+For each process i
+If Finish[i] == false
+Check if Need[i][j] <= Work[j] for all resources j
+
+If true
+For each resource k
+Work[k] = Work[k] + Allocation[i][k]
+
+Add process Pi to Safe Sequence
+Set Finish[i] = true
+Increment count
+Set found = true
+
+If no process is found (found == false)
+Print "System is NOT in safe state"
+Stop
+
+Step 5:
+If count == n
+Print "System is in SAFE state"
+Print Safe Sequence
+
+PART B – RESOURCE REQUEST ALGORITHM
+
+Step 1: Input
+
+Read process number pid
+
+Read Request vector Request[m]
+
+Step 2: Check Request <= Need
+For each resource j
+
+If Request[j] > Need[pid][j]
+Print "Error: Request exceeds maximum need"
+Stop
+
+Step 3: Check Request <= Available
+For each resource j
+
+If Request[j] > Available[j]
+Print "Process must wait.. resource not available"
+Stop
+
+Step 4: Temporary Allocation
+For each resource j
+
+Available[j] = Available[j] – Request[j]
+Allocation[pid][j] = Allocation[pid][j] + Request[j]
+Need[pid][j] = Need[pid][j] – Request[j]
+
+Step 5:
+Print "Request can be granted safely"
+
+Note:
+In a complete Banker’s Algorithm implementation, after temporary allocation, the Safety Algorithm should be executed again.
+If the system becomes unsafe, the allocation must be rolled back.
+
+Done.

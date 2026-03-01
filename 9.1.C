@@ -40,6 +40,7 @@ int main(void){
 
     int currenttime = 0;
     float totalwt = 0;
+    float totaltat = 0;
 
     for(int i = 0; i < n; i++){
 
@@ -53,9 +54,13 @@ int main(void){
 
         currenttime = p[i].ct;
         totalwt += p[i].wt;
+        totaltat+=p[i].tat;
     }
 
     float avgwt = totalwt / n;
+    float avgtat = totaltat /n;
+
+
 
     printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
 
@@ -70,6 +75,9 @@ int main(void){
     }
 
     printf("\nAverage Waiting Time = %.2f\n", avgwt);
+    printf("\nAverage TAT Time = %.2f\n", avgtat);
+
+
 
     return 0;
 }

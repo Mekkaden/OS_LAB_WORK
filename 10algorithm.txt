@@ -1,0 +1,46 @@
+int read_count = 0;        // number of active readers
+
+semaphore mutex;           // protects read_count (counter lock)
+semaphore rw_mutex;        // controls access to shared resource
+semaphore queue;           // entry gate for writer priority
+
+
+mutex = 1;       // counter is free
+rw_mutex = 1;    // resource is free
+queue = 1;       // entry gate is open
+
+
+\\READER : 
+
+wait(queue);          // enter entry line (blocked if writer waiting)
+
+wait(mutex);          // lock counter
+read_count++;         
+if (read_count == 1)  // if first reader
+    wait(rw_mutex);   // lock resource (block writers)
+signal(mutex);        
+
+signal(queue);        // allow next process to try entering
+
+// ---- Critical Section ----
+Reading is performed
+// --------------------------
+
+wait(mutex);            //TO block multiple readers from updating the mutex as imagine if 2 readers finish at the same time and both try to decrement then value goes beyond zero 
+read_count--;         
+if (read_count == 0)  // if last reader
+    signal(rw_mutex); // release resource for writers
+signal(mutex);        
+
+
+//WRITER
+
+wait(queue);          // block new readers from entering
+wait(rw_mutex);       // get exclusive access to resource
+
+// ---- Critical Section ----
+Writing is performed
+// --------------------------
+
+signal(rw_mutex);     // release resource
+signal(queue);        // allow next process to enter
