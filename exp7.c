@@ -99,6 +99,6 @@ int main(int argc, char *argv[]) {
     printf("SD     = %.2f\n", stddev);
     printf("Least  = %.2f\n", least);
 
-    free(numbers);
+    
     return 0;
 }
