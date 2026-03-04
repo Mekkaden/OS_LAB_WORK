@@ -3,24 +3,24 @@
 #include<sys/msg.h>
 #include<string.h>
 
-struct msg {
+struct message {
     long type;
     char text[100];
 };
 
-int main() {
+int main(){
 
     key_t key = ftok("progfile",65);
     int msgid = msgget(key,0666|IPC_CREAT);
 
-    struct msg m;
+    struct message m;
     char original[100];
 
     printf("Enter string: ");
     scanf("%s",original);
 
     strcpy(m.text,original);
-    m.type=1;
+    m.type = 1;
 
     msgsnd(msgid,&m,sizeof(m.text),0);
 

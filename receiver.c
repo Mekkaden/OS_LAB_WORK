@@ -3,34 +3,36 @@
 #include<sys/msg.h>
 #include<string.h>
 
-struct msg{
+struct message {
     long type;
     char text[100];
 };
 
-void reverse(char *s){
-    int i,len=strlen(s);
-    char t;
+void reverse(char *s)
+{
+    int i, len = strlen(s);
+    char temp;
 
-    for(i=0;i<len/2;i++){
-        t=s[i];
-        s[i]=s[len-i-1];
-        s[len-i-1]=t;
+    for(i = 0; i < len/2; i++)
+    {
+        temp = s[i];
+        s[i] = s[len-i-1];
+        s[len-i-1] = temp;
     }
 }
 
-int main(){
+int main()
+{
+    key_t key = ftok("progfile",65);
+    int msgid = msgget(key,0666|IPC_CREAT);
 
-    key_t key=ftok("progfile",65);
-    int msgid=msgget(key,0666|IPC_CREAT);
-
-    struct msg m;
+    struct message m;
 
     msgrcv(msgid,&m,sizeof(m.text),1,0);
 
     reverse(m.text);
 
-    m.type=2;
+    m.type = 2;
 
     msgsnd(msgid,&m,sizeof(m.text),0);
 
