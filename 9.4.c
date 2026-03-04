@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+// -------- STEP 1: Define process structure --------
 struct process {
     int pid;
     int at;
@@ -12,15 +13,18 @@ struct process {
 
 int main()
 {
+    // -------- STEP 2: Declare variables --------
     struct process p[100], temp;
     int n, i, j;
     int time = 0, completed = 0;
     int total_wt = 0, total_tat = 0;
     float avg_wt, avg_tat;
 
+    // -------- STEP 3: Read number of processes --------
     printf("Enter number of processes: ");
     scanf("%d", &n);
 
+    // -------- STEP 4: Input arrival time and burst time --------
     for (i = 0; i < n; i++)
     {
         p[i].pid = i + 1;
@@ -32,12 +36,14 @@ int main()
         scanf("%d", &p[i].bt);
 
         //crucial
-
+        // STEP 5: Initialize remaining time
         p[i].rt = p[i].bt;
     }
 
+    // -------- STEP 6: Execute processes until all complete --------
     while (completed < n)
     {
+        // STEP 7: Sort arrived processes based on remaining time
         // sort arrived processes by remaining time
         for (i = 0; i < n - 1; i++)
         {
@@ -56,13 +62,16 @@ int main()
             }
         }
 
+        // -------- STEP 8: Execute the process with shortest remaining time --------
         for (i = 0; i < n; i++)
         {
             //cruc
             if (p[i].at <= time && p[i].rt > 0)
             {
+                // STEP 9: Execute process for 1 time unit
                 p[i].rt--;
 
+                // STEP 10: If process finishes
                 if (p[i].rt == 0)
                 {
                     completed++;
@@ -74,9 +83,11 @@ int main()
             }
         }
 
+        // -------- STEP 11: Move time forward --------
         time++;
     }
 
+    // -------- STEP 12: Display process details --------
     printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
 
     for (i = 0; i < n; i++)
@@ -89,9 +100,11 @@ int main()
         total_tat += p[i].tat;
     }
 
+    // -------- STEP 13: Calculate averages --------
     avg_wt = (float)total_wt / n;
     avg_tat = (float)total_tat / n;
 
+    // -------- STEP 14: Print averages --------
     printf("\nAverage Waiting Time = %.2f", avg_wt);
     printf("\nAverage Turnaround Time = %.2f\n", avg_tat);
 
