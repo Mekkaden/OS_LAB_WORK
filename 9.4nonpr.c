@@ -31,8 +31,7 @@ int main()
         printf("Enter burst time of process %d: ", i + 1);
         scanf("%d", &p[i].bt);
 
-        //crucial
-
+        // crucial
         p[i].rt = p[i].bt;
     }
 
@@ -43,8 +42,7 @@ int main()
         {
             for (j = 0; j < n - i - 1; j++)
             {
-                //crucial
-                //check whether it has arrived and if arrived which have less remaining time
+                // check whether it has arrived and which has less burst
                 if (p[j].at <= time &&
                     p[j+1].at <= time &&
                     p[j].rt > p[j+1].rt)
@@ -58,23 +56,19 @@ int main()
 
         for (i = 0; i < n; i++)
         {
-            //cruc
             if (p[i].at <= time && p[i].rt > 0)
             {
-                p[i].rt--;
+                // -------- NON PREEMPTIVE CHANGE --------
+                time += p[i].rt;   // run full burst
+                p[i].rt = 0;
 
-                if (p[i].rt == 0)
-                {
-                    completed++;
-                    p[i].ct = time + 1;
-                    p[i].tat = p[i].ct - p[i].at;
-                    p[i].wt = p[i].tat - p[i].bt;
-                }
+                completed++;
+                p[i].ct = time;
+                p[i].tat = p[i].ct - p[i].at;
+                p[i].wt = p[i].tat - p[i].bt;
                 break;
             }
         }
-
-        time++;
     }
 
     printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");

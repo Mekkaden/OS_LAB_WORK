@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include <limits.h>
 
 struct process {
     int pid, at, bt, pr, ct, tat, wt, done;
+    int remaining_bt; // Essential for preemptive
 };
 
 int main() {
@@ -12,25 +12,26 @@ int main() {
 
     struct process p[n];
 
-    //crucial
-
     for(int i = 0; i < n; i++) {
         printf("Enter AT BT PR of P%d: ", i+1);
         scanf("%d %d %d", &p[i].at, &p[i].bt, &p[i].pr);
         p[i].pid = i + 1;
         p[i].done = 0;
+        p[i].remaining_bt = p[i].bt; // Initialize remaining time
     }
 
-    int completed = 0, time = 0; //time is like current time
+    int completed = 0, time = 0; 
     float sumWT = 0, sumTAT = 0;
 
-    //crucial
+    // The Master Clock ticks one by one
     while(completed < n) {
-        int idx = -1, max_pr = -1; 
+        int idx = -1;
+        int max_pr = -1;
 
-        for(int i = 0; i < n; i++) { //performing search to find the best process to execute now
+        // Check who is available at the CURRENT time
+        for(int i = 0; i < n; i++) {
             if(p[i].at <= time && p[i].done == 0) {
-                if(p[i].pr > max_pr) { 
+                if(p[i].pr > max_pr) {
                     max_pr = p[i].pr;
                     idx = i;
                 }
@@ -38,19 +39,25 @@ int main() {
         }
 
         if(idx == -1) {
-            time++;
-            continue; //enough for this iteration go back to the next iteration
+            time++; // Idle time
+            continue;
         }
 
-        time += p[idx].bt;
-        p[idx].ct = time;
-        p[idx].tat = p[idx].ct - p[idx].at;
-        p[idx].wt = p[idx].tat - p[idx].bt;
-        p[idx].done = 1;
+        // PREEMPTIVE STEP: Process for only 1 unit of time
+        p[idx].remaining_bt--;
+        time++;
 
-        sumWT += p[idx].wt;
-        sumTAT += p[idx].tat;
-        completed++;
+        // If the process is finished
+        if(p[idx].remaining_bt == 0) {
+            p[idx].ct = time;
+            p[idx].tat = p[idx].ct - p[idx].at;
+            p[idx].wt = p[idx].tat - p[idx].bt; // Use original bt
+            p[idx].done = 1;
+
+            sumWT += p[idx].wt;
+            sumTAT += p[idx].tat;
+            completed++;
+        }
     }
 
     printf("\nPID\tAT\tBT\tPR\tCT\tTAT\tWT\n");

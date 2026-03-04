@@ -81,3 +81,7 @@ int main(void){
 
     return 0;
 }
+
+//ct = starttime + bursttime
+//tat = ct - at; //time from queue - finish
+//wt = tat - bt //time from out of queue - finish
