@@ -1,99 +1,102 @@
-#include<stdio.h>
+#include <stdio.h>
 
-// -------- Structure Definition --------
 struct process
 {
-    int at;   // Arrival Time
-    int bt;   // Burst Time
-    int rt;   // Remaining Time
-    int ct;   // Completion Time
-    int tat;  // Turnaround Time
-    int wt;   // Waiting Time
-};
-
-struct process p[20];
+    int pid, at, bt, rt, ct, tat, wt;
+} p[50];
 
 int main()
 {
-    // -------- Step 1: Declare variables --------
-    int n,tq,time=0;
-    int queue[50],front=0,rear=0;
-    int vis[20]={0};
-    float total_wt=0,total_tat=0;
+    int n, tq;
+    int queue[100];
+    int front = 0, rear = 0;
 
-    // -------- Step 2: Read number of processes --------
+    int time = 0, completed = 0;
+    int i;
+
     printf("Enter number of processes: ");
-    scanf("%d",&n);
+    scanf("%d", &n);
 
-    // -------- Step 3: Read time quantum --------
     printf("Enter time quantum: ");
-    scanf("%d",&tq);
+    scanf("%d", &tq);
 
-    // -------- Step 4: Input arrival and burst time --------
-    for(int i=0;i<n;i++)
+    for (i = 0; i < n; i++)
     {
-        printf("AT BT of P%d: ",i+1);
-        scanf("%d%d",&p[i].at,&p[i].bt);
+        p[i].pid = i + 1;
 
-        p[i].rt=p[i].bt;   // remaining time = burst time
+        printf("Enter arrival time of P%d: ", i + 1);
+        scanf("%d", &p[i].at);
+
+        printf("Enter burst time of P%d: ", i + 1);
+        scanf("%d", &p[i].bt);
+
+        p[i].rt = p[i].bt;
     }
 
-    // -------- Step 5: Insert processes that arrive at time 0 --------
-    for(int i=0;i<n;i++)
-        if(p[i].at==0){
-            queue[rear++]=i;
-            vis[i]=1;
-        }
+    // Insert processes arriving at time 0
+    for (i = 0; i < n; i++)
+        if (p[i].at == 0)
+            queue[rear++] = i;
 
-    // -------- Step 6: Round Robin Execution --------
-    while(front<rear)
-    {
-        int i=queue[front];
-        front++;
+    while (completed < n)
+        {
+            // CPU idle
+            if (front == rear)
+            {
+                time++;
 
-        // Case 1: Process needs more than quantum
-        if(p[i].rt>tq){
-            time = time + tq;
-            p[i].rt = p[i].rt - tq;
-        }
+                for (i = 0; i < n; i++)
+                    if (p[i].at == time)
+                        queue[rear++] = i;
 
-        // Case 2: Process finishes
-        else{
-            time = time + p[i].rt;
-            p[i].rt = 0;
-
-            p[i].ct = time;
-            p[i].tat = p[i].ct - p[i].at;
-            p[i].wt = p[i].tat - p[i].bt;
-        }
-
-        // -------- Step 7: Add newly arrived processes --------
-        for(int j=0;j<n;j++)
-            if(p[j].at<=time && !vis[j]){
-                queue[rear++]=j;
-                vis[j]=1;
+                continue;
             }
 
-        // -------- Step 8: Reinsert process if not finished --------
-        if(p[i].rt>0)
-            queue[rear++]=i;
+        int idx = queue[front++];   // dequeue
+
+        if (p[idx].rt <= tq)
+        {
+            time += p[idx].rt;
+            p[idx].rt = 0;
+
+            p[idx].ct = time;
+            p[idx].tat = p[idx].ct - p[idx].at;
+            p[idx].wt = p[idx].tat - p[idx].bt;
+
+            completed++;
+        }
+        else
+        {
+            time += tq;
+            p[idx].rt -= tq;
+        }
+
+        // Add newly arrived processes
+        for (i = 0; i < n; i++)
+            if (p[i].at > time - tq && p[i].at <= time)
+                queue[rear++] = i;
+
+        // Reinsert unfinished process
+        if (p[idx].rt > 0)
+            queue[rear++] = idx;
     }
 
-    // -------- Step 9: Print results --------
-    printf("\nPID AT BT CT TAT WT\n");
+    printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
 
-    for(int i=0;i<n;i++)
+    float total_wt = 0, total_tat = 0;
+
+    for (i = 0; i < n; i++)
     {
-        printf("P%d %d %d %d %d %d\n",
-        i+1,p[i].at,p[i].bt,p[i].ct,p[i].tat,p[i].wt);
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
+               p[i].pid, p[i].at, p[i].bt,
+               p[i].ct, p[i].tat, p[i].wt);
 
         total_wt += p[i].wt;
         total_tat += p[i].tat;
     }
 
-    // -------- Step 10: Calculate averages --------
-    printf("\nAverage Waiting Time = %.2f", total_wt/n);
-    printf("\nAverage Turnaround Time = %.2f\n", total_tat/n);
+    printf("\nAverage Waiting Time = %.2f", total_wt / n);
+    printf("Average Turnaround Time = %.2f\n", total_tat / n);
 
     return 0;
 }
