@@ -39,4 +39,3 @@ The programs are written for **learning, practice, and quick revision** before l
 ## ⚙️ Requirements
 
 - **GCC Compiler**
-- **Linux / Ubuntu / WSL / Mac Terminal**
