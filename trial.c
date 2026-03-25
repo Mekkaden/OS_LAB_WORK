@@ -1,1 +1,1 @@
-write(fd[1],&ac,sizeof(sc))
+char * arg[] ={"./myadder",argv[1],argv[2],null}

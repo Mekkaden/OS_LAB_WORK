@@ -14,7 +14,7 @@ int main()
 {
     struct process p[100], temp;
     int n, i, j;
-    int time = 0, completed = 0;
+    int currenttime = 0, completed = 0;
     int total_wt = 0, total_tat = 0;
     float avg_wt, avg_tat;
 
@@ -43,8 +43,8 @@ int main()
             for (j = 0; j < n - i - 1; j++)
             {
                 // check whether it has arrived and which has less burst
-                if (p[j].at <= time &&
-                    p[j+1].at <= time &&
+                if (p[j].at <= currenttime &&
+                    p[j+1].at <= currenttime &&
                     p[j].rt > p[j+1].rt)
                 {
                     temp = p[j];
@@ -56,14 +56,14 @@ int main()
 
         for (i = 0; i < n; i++)
         {
-            if (p[i].at <= time && p[i].rt > 0)
+            if (p[i].at <= currenttime && p[i].rt > 0)
             {
                 // -------- NON PREEMPTIVE CHANGE --------
-                time += p[i].rt;   // run full burst
+                currenttime += p[i].rt;   // run full burst
                 p[i].rt = 0;
 
                 completed++;
-                p[i].ct = time;
+                p[i].ct = currenttime;
                 p[i].tat = p[i].ct - p[i].at;
                 p[i].wt = p[i].tat - p[i].bt;
                 break;

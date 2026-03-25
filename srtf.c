@@ -16,7 +16,7 @@ int main()
     // -------- STEP 2: Declare variables --------
     struct process p[100], temp;
     int n, i, j;
-    int time = 0, completed = 0;
+    int currenttime = 0, completed = 0;
     int total_wt = 0, total_tat = 0;
     float avg_wt, avg_tat;
 
@@ -51,8 +51,8 @@ int main()
             {
                 //crucial
                 //check whether it has arrived and if arrived which have less remaining time
-                if (p[j].at <= time &&
-                    p[j+1].at <= time &&
+                if (p[j].at <= currenttime &&
+                    p[j+1].at <= currenttime &&
                     p[j].rt > p[j+1].rt)
                 {
                     temp = p[j];
@@ -66,7 +66,7 @@ int main()
         for (i = 0; i < n; i++)
         {
             //cruc
-            if (p[i].at <= time && p[i].rt > 0)
+            if (p[i].at <= currenttime && p[i].rt > 0)
             {
                 // STEP 9: Execute process for 1 time unit
                 p[i].rt--;
@@ -75,16 +75,16 @@ int main()
                 if (p[i].rt == 0)
                 {
                     completed++;
-                    p[i].ct = time + 1;
+                    p[i].ct = currenttime + 1;
                     p[i].tat = p[i].ct - p[i].at;
                     p[i].wt = p[i].tat - p[i].bt;
                 }
-                break;
+                break; //to allow only one process to run
             }
         }
 
         // -------- STEP 11: Move time forward --------
-        time++;
+        currenttime++;
     }
 
     // -------- STEP 12: Display process details --------
