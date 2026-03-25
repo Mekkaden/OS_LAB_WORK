@@ -1,0 +1,42 @@
+Algorithm: First Come First Serve (FCFS)
+
+Step 1: Start
+
+Step 2: Read the number of processes (n)
+
+Step 3: For each process, read:
+        a) Process ID (PID)
+        b) Arrival Time (AT)
+        c) Burst Time (BT)
+
+Step 4: Arrange all processes in ascending order of Arrival Time (AT)
+
+Step 5: Initialize:
+        current_time = 0
+        total_wt = 0
+        total_tat = 0
+
+Step 6: For each process 
+
+        If current_time < AT[i]
+            current_time = AT[i]
+
+        Completion Time (CT[i]) = current_time + BT[i]
+
+        Turnaround Time (TAT[i]) = CT[i] - AT[i]
+
+        Waiting Time (WT[i]) = TAT[i] - BT[i]
+
+        current_time = CT[i]
+
+        total_wt = total_wt + WT[i]
+        total_tat = total_tat + TAT[i]
+
+Step 7: Compute:
+        Average Waiting Time = total_wt / n
+        Average Turnaround Time = total_tat / n
+
+Step 8: Display:
+        PID, AT, BT, CT, TAT, WT
+
+Step 9: Stop

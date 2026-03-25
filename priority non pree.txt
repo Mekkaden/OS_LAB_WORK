@@ -1,0 +1,41 @@
+Algorithm: Non-Preemptive Priority Scheduling
+
+Step 1: Start
+
+Step 2: Read the number of processes (n)
+
+Step 3: For each process, read:
+        a) Process ID (PID)
+        b) Arrival Time (AT)
+        c) Burst Time (BT)
+        d) Priority (PR)
+
+Step 4: Initialize the system time to 0
+
+Step 5: Repeat until all processes are completed:
+
+        a) From the set of processes that have arrived (AT ≤ current time)
+           and are not yet executed, select the process with the highest priority
+
+        b) If no such process is available:
+                Increment the current time by 1 and repeat Step 5
+
+        c) Allocate CPU to the selected process
+
+        d) Execute the process completely (non-preemptive)
+
+        e) Update Completion Time (CT) of the process
+
+        f) Calculate:
+                Turnaround Time (TAT) = CT - AT
+                Waiting Time (WT) = TAT - BT
+
+        g) Mark the process as completed
+
+Step 6: Compute:
+        Average Waiting Time = (Sum of all WT) / n
+        Average Turnaround Time = (Sum of all TAT) / n
+
+Step 7: Display PID, AT, BT, PR, CT, TAT and WT
+
+Step 8: Stop

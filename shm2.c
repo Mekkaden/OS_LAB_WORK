@@ -14,7 +14,7 @@ int main(){
 
     key_t key = ftok("shared_key.txt",65);
 
-    int shmid = shmget(key,sizeof(struct data),0666);
+    int shmid = shmget(key, sizeof(struct data), 0666 | IPC_CREAT);
 
     if(shmid < 0){
         perror("shmget failed. Run process 1 first.");

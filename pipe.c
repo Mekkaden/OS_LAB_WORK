@@ -25,6 +25,7 @@ int main() {
         close(fd[1]);
     }
     else {   // Parent
+        wait(NULL);
         close(fd[1]);
         int ac;
         read(fd[0], &ac, sizeof(ac));
@@ -39,7 +40,7 @@ int main() {
             printf("Square root of discriminant is %.2f\n", sqrt(disc));
         }
 
-        wait(NULL);
+        
     }
 
     return 0;

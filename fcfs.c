@@ -83,5 +83,12 @@ int main(void){
 }
 
 //ct = starttime + bursttime
+
+//Start Time = max(previous Completion Time, Arrival Time)
+
+
 //tat = ct - at; //time from queue - finish
 //wt = tat - bt //time from out of queue - finish
+
+
+

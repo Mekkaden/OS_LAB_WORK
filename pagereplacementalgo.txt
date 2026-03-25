@@ -1,0 +1,57 @@
+Algorithm
+FIFO
+1. Start
+2. Read n (length of reference string) and f (number of frames) from command line arguments.
+3. Generate a random page reference string with values between 0 and 9.
+4. Initialize all frames as empty and set page_fault = 0.
+5. For each page in the reference string:
+o If the page is already in memory → Page Hit
+o Else
+ Page Fault occurs
+ Increment page_fault
+ If empty frame exists → insert page
+ Else → replace the oldest page (FIFO)
+
+6. Continue until all pages are processed.
+
+7. Display the total number of page faults.
+8. Stop.
+
+
+
+
+LRU
+
+1. Start
+2. Read n (length of reference string) and f (number of frames).
+3. Generate a random page reference string (0–9).
+4. Initialize frames as empty and set page_fault = 0.
+5. For each page in the reference string:
+o If the page is already in memory → Page Hit and update its recent usage
+o Else
+ Page Fault occurs
+ Increment page_fault
+ If empty frame exists → insert page
+ Else → replace the Least Recently Used page
+
+6. Continue until all pages are processed.
+7. Display the total number of page faults.
+8. Stop.
+
+Optimal
+1. Start
+2. Read n (length of reference string) and f (number of frames).
+3. Generate a random page reference string (0–9).
+4. Initialize frames as empty and set page_fault = 0.
+5. For each page in the reference string:
+o If page exists in frame → Page Hit
+o Else
+ Page Fault occurs
+ Increment page_fault
+ If empty frame exists → insert page
+ Else
+ Look ahead in the reference string
+ Replace the page whose next use is farthest in the future
+6. Continue until all pages are processed.
+7. Display the total number of page faults.
+8. Stop.

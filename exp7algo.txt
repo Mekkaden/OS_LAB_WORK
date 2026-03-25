@@ -1,15 +1,13 @@
-The Algorithm (Step-by-Step)
-
-This is the game plan for how the program runs:
-
-    Input: Get the numbers from the command line.
-
-    Setup: Allocate memory to store those numbers in an array.
-
-    Delegate: Start 3 threads. Thread A handles Mean, Thread B handles Median, and Thread C handles Standard Deviation.
-
-    Wait: The main program stops and waits for all three threads to finish their work.
-
-    Output: Once everyone is done, print the results stored in the global variables.
-
-    Cleanup: Free the memory you borrowed and exit.
+Algorithm
+1. Start the program.
+2. Read integers from the command line.
+3. Store the integers in a dynamically allocated array.
+4. Create three threads:
+o Thread 1 calculates the mean.
+o Thread 2 calculates the median.
+o Thread 3 calculates the standard deviation.
+5. Each thread stores its result in a global variable.
+6. The parent thread waits for all worker threads using pthread_join().
+7. Display the computed results.
+8. Free allocated memory.
+9. Stop the program.

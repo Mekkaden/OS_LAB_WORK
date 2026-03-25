@@ -21,7 +21,7 @@ int main() {
         p[i].done = 0;
     }
 
-    int completed = 0, time = 0; //time is like current time
+    int completed = 0, currenttime = 0; //time is like current time
     float sumWT = 0, sumTAT = 0;
 
     //crucial
@@ -29,21 +29,22 @@ int main() {
         int idx = -1, max_pr = -1; 
 
         for(int i = 0; i < n; i++) { //performing search to find the best process to execute now
-            if(p[i].at <= time && p[i].done == 0) {
+            if(p[i].at <= currenttime && p[i].done == 0) {
                 if(p[i].pr > max_pr) { 
                     max_pr = p[i].pr;
                     idx = i;
+                    //idx is index of the selected process
                 }
             }
         }
 
         if(idx == -1) {
-            time++;
+            currenttime++;
             continue; //enough for this iteration go back to the next iteration
         }
 
-        time += p[idx].bt;
-        p[idx].ct = time;
+        currenttime += p[idx].bt;
+        p[idx].ct = currenttime;
         p[idx].tat = p[idx].ct - p[idx].at;
         p[idx].wt = p[idx].tat - p[idx].bt;
         p[idx].done = 1;

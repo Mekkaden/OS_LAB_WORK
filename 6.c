@@ -3,6 +3,8 @@
 #include<stdlib.h>
 #include<sys/wait.h>
 
+
+
 int main(int argc, char *argv[])
 {
     // Step 1: Check if two command line arguments are provided
@@ -44,7 +46,6 @@ int main(int argc, char *argv[])
     {
         // Step 9: Parent waits for child process to finish
         wait(NULL);
-
         // Step 10: Print completion message
         printf("Child completed execution\n");
     }
