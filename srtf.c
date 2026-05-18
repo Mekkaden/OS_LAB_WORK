@@ -1,112 +1,86 @@
 #include <stdio.h>
 
-// -------- STEP 1: Define process structure --------
 struct process {
-    int pid;
-    int at;
-    int bt;
-    int rt;
-    int ct;
-    int tat;
-    int wt;
+    int pid, at, bt, ct, tat, wt, done;
+    int remaining_bt; // This is the 'rt'
 };
 
-int main()
-{
-    // -------- STEP 2: Declare variables --------
-    struct process p[100], temp;
-    int n, i, j;
-    int currenttime = 0, completed = 0;
-    int total_wt = 0, total_tat = 0;
-    float avg_wt, avg_tat;
-
-    // -------- STEP 3: Read number of processes --------
+int main(void) {
+    int n;
     printf("Enter number of processes: ");
-    scanf("%d", &n);
+    if (scanf("%d", &n) != 1) return 1;
 
-    // -------- STEP 4: Input arrival time and burst time --------
-    for (i = 0; i < n; i++)
-    {
+    struct process p[n];
+
+    for(int i = 0; i < n; i++) {
+        printf("Enter AT and BT of P%d: ", i+1);
+        scanf("%d %d", &p[i].at, &p[i].bt);
         p[i].pid = i + 1;
-
-        printf("Enter arrival time of process %d: ", i + 1);
-        scanf("%d", &p[i].at);
-
-        printf("Enter burst time of process %d: ", i + 1);
-        scanf("%d", &p[i].bt);
-
-        //crucial
-        // STEP 5: Initialize remaining time
-        p[i].rt = p[i].bt;
+        p[i].done = 0;
+        p[i].remaining_bt = p[i].bt; // Crucial: Initialize remaining time
     }
 
-    // -------- STEP 6: Execute processes until all complete --------
-    while (completed < n)
-    {
-        // STEP 7: Sort arrived processes based on remaining time
-        // sort arrived processes by remaining time
-        for (i = 0; i < n - 1; i++)
-        {
-            for (j = 0; j < n - i - 1; j++)
-            {
-                //crucial
-                //check whether it has arrived and if arrived which have less remaining time
-                if (p[j].at <= currenttime &&
-                    p[j+1].at <= currenttime &&
-                    p[j].rt > p[j+1].rt)
-                {
-                    temp = p[j];
-                    p[j] = p[j+1];
-                    p[j+1] = temp;
-                }
+    int completed = 0, currenttime = 0; 
+    float sumWT = 0, sumTAT = 0;
+
+    // --- LAZY GANTT CHART SETUP ---
+    printf("\n--- Gantt Chart ---\n");
+    printf("0"); // Start the timeline at 0
+
+    // The Master Clock ticks one by one
+    while(completed < n) {
+        int idx = -1;
+        int min_rt = 99999; 
+
+        // Check who is available at the CURRENT time
+        for(int i = 0; i < n; i++) {
+            // SRTF LOGIC: Find the arrived process with the SMALLEST remaining time
+            if(p[i].at <= currenttime && p[i].done == 0 && p[i].remaining_bt < min_rt) {
+                min_rt = p[i].remaining_bt;
+                idx = i;
             }
         }
 
-        // -------- STEP 8: Execute the process with shortest remaining time --------
-        for (i = 0; i < n; i++)
-        {
-            //cruc
-            if (p[i].at <= currenttime && p[i].rt > 0)
-            {
-                // STEP 9: Execute process for 1 time unit
-                p[i].rt--;
-
-                // STEP 10: If process finishes
-                if (p[i].rt == 0)
-                {
-                    completed++;
-                    p[i].ct = currenttime + 1;
-                    p[i].tat = p[i].ct - p[i].at;
-                    p[i].wt = p[i].tat - p[i].bt;
-                }
-                break; //to allow only one process to run
-            }
+        if(idx == -1) {
+            currenttime++; // CPU is idle
+            
+            // --- LAZY GANTT: IDLE TICK ---
+            printf(" --IDLE-- %d", currenttime); 
+            continue;
         }
 
-        // -------- STEP 11: Move time forward --------
+        // PREEMPTIVE STEP: Process for only 1 unit of time
+        p[idx].remaining_bt--;
         currenttime++;
+        
+        // --- LAZY GANTT: PROCESS TICK ---
+        printf(" --P%d-- %d", p[idx].pid, currenttime);
+
+        // If the process is finished
+        if(p[idx].remaining_bt == 0) {
+            // EXACT SAME MATH BLOCK AS BEFORE
+            p[idx].ct = currenttime;
+            p[idx].tat = p[idx].ct - p[idx].at;
+            p[idx].wt = p[idx].tat - p[idx].bt; 
+            p[idx].done = 1;
+
+            sumWT += p[idx].wt;
+            sumTAT += p[idx].tat;
+            completed++;
+        }
     }
 
-    // -------- STEP 12: Display process details --------
-    printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
-
-    for (i = 0; i < n; i++)
-    {
-        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
-               p[i].pid, p[i].at, p[i].bt,
-               p[i].ct, p[i].tat, p[i].wt);
-
-        total_wt += p[i].wt;
-        total_tat += p[i].tat;
+    // --- TABLE PRINTING ---
+    // Added an extra \n here so the table doesn't smash into the Gantt chart
+    printf("\n\nPID\tAT\tBT\tCT\tTAT\tWT\n");
+    for(int i = 0; i < n; i++) {
+        printf("%d\t%d\t%d\t%d\t%d\t%d\n",
+            p[i].pid, p[i].at, p[i].bt, 
+            p[i].ct, p[i].tat, p[i].wt);
     }
 
-    // -------- STEP 13: Calculate averages --------
-    avg_wt = (float)total_wt / n;
-    avg_tat = (float)total_tat / n;
-
-    // -------- STEP 14: Print averages --------
-    printf("\nAverage Waiting Time = %.2f", avg_wt);
-    printf("\nAverage Turnaround Time = %.2f\n", avg_tat);
+    printf("\nAverage TAT = %.2f", sumTAT / n);
+    printf("\nAverage WT  = %.2f\n", sumWT / n);
 
     return 0;
 }

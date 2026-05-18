@@ -8,7 +8,7 @@ struct process {
 int main(void) {
     int n;
     printf("Enter number of processes: ");
-    scanf("%d", &n);
+    if (scanf("%d", &n) != 1) return 1;
 
     struct process p[n];
 
@@ -22,6 +22,10 @@ int main(void) {
     int completed = 0, currenttime = 0;
     float sumWT = 0, sumTAT = 0;
 
+    // --- LAZY GANTT CHART SETUP ---
+    printf("\n--- Gantt Chart ---\n");
+    printf("0");
+
     // --- PRIORITY SCHEDULING LOGIC ---
     while(completed < n) {
         int idx = -1, max_pr = -1; 
@@ -30,40 +34,36 @@ int main(void) {
             if(p[i].at <= currenttime && p[i].done == 0 && p[i].pr > max_pr) {
                 max_pr = p[i].pr;
                 idx = i;
-    }
-}
+            }
+        }
 
         if(idx == -1) {
             currenttime++;
+            // --- LAZY GANTT: IDLE PRINT ---
+            printf(" --IDLE-- %d", currenttime);
             continue; 
         }
 
-    p[idx].ct = currenttime + p[idx].bt;
-    p[idx].tat = p[idx].ct - p[idx].at;
-    p[idx].wt = p[idx].tat - p[idx].bt;
-    currenttime = p[idx].ct;
+        // --- THE STANDARDIZED FCFS MATH BLOCK ---
+        p[idx].ct = currenttime + p[idx].bt;
+        p[idx].tat = p[idx].ct - p[idx].at;
+        p[idx].wt = p[idx].tat - p[idx].bt;
+        currenttime = p[idx].ct;
 
-    p[idx].done = 1; // Mark as done for Priority
-// ------------------------
+        p[idx].done = 1; // Mark as done for Priority
 
-    sumWT += p[idx].wt; 
-    sumTAT += p[idx].tat;
-    completed++;
-    }
+        // --- LAZY GANTT: PROCESS PRINT ---
+        printf(" --P%d-- %d", p[idx].pid, currenttime);
+        // ----------------------------------------
 
-    // --- THE MAGIC TRICK: Sort by Completion Time (Execution Order) ---
-    for(int i = 0; i < n - 1; i++) {
-        for(int j = 0; j < n - i - 1; j++) {
-            if(p[j].ct > p[j+1].ct) {
-                struct process temp = p[j];
-                p[j] = p[j+1];
-                p[j+1] = temp;
-            }
-        }
+        sumWT += p[idx].wt; 
+        sumTAT += p[idx].tat;
+        completed++;
     }
 
     // --- TABLE PRINTING ---
-    printf("\nPID\tAT\tBT\tPR\tCT\tTAT\tWT\n");
+    // Added \n\n to make sure the table doesn't crash into the Gantt chart
+    printf("\n\nPID\tAT\tBT\tPR\tCT\tTAT\tWT\n");
     for(int i = 0; i < n; i++) {
         printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
             p[i].pid, p[i].at, p[i].bt, p[i].pr,
@@ -72,39 +72,6 @@ int main(void) {
 
     printf("\nAverage TAT = %.2f", sumTAT / n);
     printf("\nAverage WT  = %.2f\n", sumWT / n);
-
-
-    // --- YOUR EXACT FCFS GANTT CHART (Slightly adjusted for Idle) ---
-    printf("\n--- Gantt Chart ---\n ");
-    
-    int gantt_time = 0;
-    
-    // 1. Print Top Timeline Bar
-    for(int i = 0; i < n; i++){
-        int start_time = p[i].ct - p[i].bt; // Calculate when process actually started
-        
-        if(gantt_time < start_time){
-            printf("| IDLE "); 
-            gantt_time = start_time;
-        }
-        printf("|  P%d  ", p[i].pid);
-        gantt_time = p[i].ct;
-    }
-    printf("|\n "); 
-
-    // 2. Print Bottom Time Markers
-    gantt_time = 0;
-    for(int i = 0; i < n; i++){
-        int start_time = p[i].ct - p[i].bt;
-        
-        if(gantt_time < start_time){
-            printf("%-7d", gantt_time); 
-            gantt_time = start_time;
-        }
-        printf("%-7d", gantt_time); 
-        gantt_time = p[i].ct;
-    }
-    printf("%d\n\n", gantt_time); 
 
     return 0;
 }

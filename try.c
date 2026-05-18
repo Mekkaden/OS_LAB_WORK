@@ -1,109 +1,114 @@
 #include <stdio.h>
+#include<stdlib.h>
 
-struct process {
+
+struct process{
     int pid;
-    int wt;
     int bt;
-    int at;
-    int ct;
+    int wt;
     int tat;
+    int at;
+    int rt;
+    int inq;
+    int ct;
 };
 
-int main(void) {
+int main(void){
+
+   
     int n;
-    int t = 0;
-    float twt = 0;  // Changed to float for accurate average division later
-    float ttat = 0; // Changed to float for accurate average division later
-
-    printf("Enter the no of processes: ");
-    if (scanf("%d", &n) != 1) {
-        return 1;
-    }
-
-    // Declaring array AFTER getting the value of n
+    int tq;
+    int t = 0 ;
+    int completed = 0 ;
+    printf("Enter the number of processes");
+    scanf("%d",&n);
+    printf("\nEnter the time quantum");
+    scanf("%d",&tq);
     struct process p[n];
 
-    for (int i = 0; i < n; i++) {
-        printf("\nEnter the pid, at, bt of process %d: ", i + 1);
-        scanf("%d", &p[i].pid);
-        scanf("%d", &p[i].at);
-        scanf("%d", &p[i].bt);
+    printf("Enter the at,bt of processes\n");
+    for(int i = 0 ; i < n ;i++){
+        printf("Process %d\n" , i);
+        scanf("%d %d",&p[i].at,&p[i].bt);
+        p[i].pid  = i+1;
+        p[i].inq = 0;
+        p[i].rt = p[i].bt;
     }
 
-    // Bubble sort logic - FIXED: changed i to j
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-            if (p[j].at > p[j + 1].at) {
-                struct process temp = p[j];
-                p[j] = p[j + 1];
-                p[j + 1] = temp;
+    int queue[100];
+    int f = 0;
+    int stat = 0 ;
+    int swt = 0;
+    int r = 0;
+
+    printf("\n---- Gantt cahrt ----- \n");
+    printf("0");
+
+    while(completed < n){
+
+        //check for newly arrievd processes
+        for(int i = 0;i<n;i++){
+            if(p[i].at <= t && p[i].inq == 0){
+                queue[r++] = i ;
+                p[i].inq = 1;
             }
         }
-    }
-
-    // Calculations logic
-    for (int i = 0; i < n; i++) {
-        if (t < p[i].at) {
-            t = p[i].at;
-        }
-        p[i].ct = t + p[i].bt;
-        p[i].tat = p[i].ct - p[i].at;
-        p[i].wt = p[i].tat - p[i].bt;
-
-        ttat += p[i].tat;
-        twt += p[i].wt;
-
-        t = p[i].ct;
-    }
-
-    float awt = twt / n;
-    float atat = ttat / n;
-
-    // Header for the table
-    printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
-
-    // FIXED: Added missing loop for printing the table rows
-    for (int i = 0; i < n; i++) {
-        printf("%d\t%d\t%d\t%d\t%d\t%d\n",
-               p[i].pid,
-               p[i].at,
-               p[i].bt,
-               p[i].ct,
-               p[i].tat,
-               p[i].wt);
-    }
-
-    // FIXED: Used correct variable names (awt and atat)
-    printf("\nAverage Waiting Time = %.2f\n", awt);
-    printf("Average TAT Time = %.2f\n", atat);
-
-    // --- GANTT CHART PRINTING ---
-    printf("\n--- Gantt Chart ---\n ");
     
-    int gantt_time = 0;
-    
-    // 1. Print Top Timeline Bar
-    for (int i = 0; i < n; i++) {
-        if (gantt_time < p[i].at) {
-            printf("| IDLE "); 
-            gantt_time = p[i].at;
-        }
-        printf("|  P%d  ", p[i].pid);
-        gantt_time = p[i].ct;
-    }
-    printf("|\n "); 
 
-    // 2. Print Bottom Time Markers
-    gantt_time = 0;
-    for (int i = 0; i < n; i++) {
-        if (gantt_time < p[i].at) {
-            printf("%-7d", gantt_time); 
-            gantt_time = p[i].at;
-        }
-        printf("%-7d", gantt_time); 
-        gantt_time = p[i].ct;
+    //check for cpu idle time 
+    if(f == r){
+        t++;
+        printf(" --idle ---%d" , t);
+        continue;
     }
-    printf("%d\n\n", gantt_time); 
+
+    //dequeue
+    int idx = queue[f++];
+
+    if(p[idx].rt <= tq){
+        p[idx].rt =0;
+        t+=p[idx].rt;
+
+        p[idx].ct = t;
+        p[idx].tat = p[idx].ct - p[idx].at;
+        p[idx].wt = p[idx].tat - p[idx].bt;
+
+        stat += p[idx].wt;
+        swt += p[idx].tat;
+        completed++;
+
+    }else{
+        t+=tq;
+        p[idx].rt -=tq;
+    }
+
+    printf("---P%d  %d" , p[idx].pid , t);
+
+    //check for newly arrived processes during runtime
+    for(int i = 0 ; i < n;i++){
+        if(p[i].at <=t && p[i].inq==0){
+            queue[r++] = i;
+            p[i].inq = 1;
+        }
+    }
+
+    if(p[idx].rt != 0 ){
+        queue[r++] = idx;
+    }
+
+}
+
+
+//printitng table
+
+printf("\nTABLE\n");
+
+printf("\nPID\tAT\tBT\tWT\tCT\tTAT\n");
+
+for(int i = 0 ; i < n ; i++){
+    printf("%d\t%d\t%d\t%d\t%d\t%d\n" ,p[i].pid,p[i].at,p[i].bt,p[i].wt,p[i].ct,p[i].tat);
+    
+}
 
     return 0;
 }
