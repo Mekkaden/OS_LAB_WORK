@@ -1,4 +1,4 @@
-Algorithm: First Come First Serve (FCFS) with Gantt Chart
+Algorithm: First Come First Serve (FCFS)
 
 Step 1: Start
 
@@ -15,29 +15,20 @@ Step 5: Initialize:
         current_time = 0
         total_wt = 0
         total_tat = 0
-        gantt_index = 0
 
-Step 6: For each process i from 0 to n-1:
+Step 6: For each process 
 
-        If current_time < AT[i] then:
-            Gantt_Block[gantt_index].id = -1
-            Gantt_Block[gantt_index].start = current_time
-            Gantt_Block[gantt_index].end = AT[i]
-            gantt_index = gantt_index + 1
+        If current_time < AT[i]
             current_time = AT[i]
 
-        Gantt_Block[gantt_index].id = PID[i]
-        Gantt_Block[gantt_index].start = current_time
-        
         Completion Time (CT[i]) = current_time + BT[i]
-        
-        Gantt_Block[gantt_index].end = CT[i]
-        gantt_index = gantt_index + 1
 
         Turnaround Time (TAT[i]) = CT[i] - AT[i]
+
         Waiting Time (WT[i]) = TAT[i] - BT[i]
 
         current_time = CT[i]
+
         total_wt = total_wt + WT[i]
         total_tat = total_tat + TAT[i]
 
@@ -45,13 +36,7 @@ Step 7: Compute:
         Average Waiting Time = total_wt / n
         Average Turnaround Time = total_tat / n
 
-Step 8: Display the process execution table:
+Step 8: Display:
         PID, AT, BT, CT, TAT, WT
 
-Step 9: Display the Gantt Chart:
-        a) Print top timeline bar: Loop through Gantt_Block from 0 to gantt_index-1. If id == -1, print "| IDLE ", else print "| P[id] ". End loop and print "|".
-        b) Print bottom time markers: Loop through Gantt_Block from 0 to gantt_index-1. Print start time aligned under the block. After the loop ends, print the final end time of the last block.
-
-Step 10: Display Average Waiting Time and Average Turnaround Time
-
-Step 11: Stop
+Step 9: Stop

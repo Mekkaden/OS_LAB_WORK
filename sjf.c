@@ -1,93 +1,112 @@
 #include <stdio.h>
+#include <limits.h>
 
 struct process {
-    int pid;
-    int at;
-    int bt;
-    int rt;
-    int ct;
-    int tat;
-    int wt;
+    int pid, at, bt, ct, tat, wt, done; // No 'rt' needed, just 'done'
 };
 
-int main()
-{
-    struct process p[100], temp;
-    int n, i, j;
-    int currenttime = 0, completed = 0;
-    int total_wt = 0, total_tat = 0;
-    float avg_wt, avg_tat;
-
+int main(void) {
+    int n;
     printf("Enter number of processes: ");
-    scanf("%d", &n);
+    if (scanf("%d", &n) != 1) return 1;
 
-    for (i = 0; i < n; i++)
-    {
+    struct process p[n]; // Declared AFTER scanning n
+
+    for(int i = 0; i < n; i++) {
+        printf("Enter AT and BT of P%d: ", i + 1);
+        scanf("%d %d", &p[i].at, &p[i].bt);
         p[i].pid = i + 1;
-
-        printf("Enter arrival time of process %d: ", i + 1);
-        scanf("%d", &p[i].at);
-
-        printf("Enter burst time of process %d: ", i + 1);
-        scanf("%d", &p[i].bt);
-
-        // crucial
-        p[i].rt = p[i].bt;
+        p[i].done = 0; // Initialize as not finished
     }
 
-    while (completed < n)
-    {
-        // sort arrived processes by remaining time
-        for (i = 0; i < n - 1; i++)
-        {
-            for (j = 0; j < n - i - 1; j++)
-            {
-                // check whether it has arrived and which has less burst
-                if (p[j].at <= currenttime &&
-                    p[j+1].at <= currenttime &&
-                    p[j].rt > p[j+1].rt)
-                {
-                    temp = p[j];
-                    p[j] = p[j+1];
-                    p[j+1] = temp;
-                }
+    int completed = 0, currenttime = 0;
+    float sumWT = 0, sumTAT = 0;
+
+    // --- SJF SCHEDULING LOGIC ---
+    while(completed < n) {
+        int idx = -1;
+        int min_bt = 9999; 
+
+        // Search for the arrived process with the SHORTEST burst time
+        for(int i = 0; i < n; i++) { 
+            if(p[i].at <= currenttime && p[i].done == 0 && p[i].bt < min_bt) {
+                min_bt = p[i].bt;
+                idx = i;
             }
         }
 
-        for (i = 0; i < n; i++)
-        {
-            if (p[i].at <= currenttime && p[i].rt > 0)
-            {
-                // -------- NON PREEMPTIVE CHANGE --------
-                currenttime += p[i].rt;   // run full burst
-                p[i].rt = 0;
+        if(idx == -1) {
+            currenttime++;
+            continue; // CPU is idle
+        }
 
-                completed++;
-                p[i].ct = currenttime;
-                p[i].tat = p[i].ct - p[i].at;
-                p[i].wt = p[i].tat - p[i].bt;
-                break;
+        // --- THE STANDARDIZED FCFS MATH BLOCK ---
+        p[idx].ct = currenttime + p[idx].bt;
+        p[idx].tat = p[idx].ct - p[idx].at;
+        p[idx].wt = p[idx].tat - p[idx].bt;
+        currenttime = p[idx].ct;
+
+        p[idx].done = 1; // Mark as done
+        // ----------------------------------------
+
+        sumWT += p[idx].wt;
+        sumTAT += p[idx].tat;
+        completed++;
+    }
+
+    // --- THE MAGIC TRICK: Sort by Completion Time (Execution Order) ---
+    for(int i = 0; i < n - 1; i++) {
+        for(int j = 0; j < n - i - 1; j++) {
+            if(p[j].ct > p[j+1].ct) {
+                struct process temp = p[j];
+                p[j] = p[j+1];
+                p[j+1] = temp;
             }
         }
     }
 
+    // --- TABLE PRINTING ---
     printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
-
-    for (i = 0; i < n; i++)
-    {
-        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
-               p[i].pid, p[i].at, p[i].bt,
-               p[i].ct, p[i].tat, p[i].wt);
-
-        total_wt += p[i].wt;
-        total_tat += p[i].tat;
+    for(int i = 0; i < n; i++) {
+        printf("%d\t%d\t%d\t%d\t%d\t%d\n",
+            p[i].pid, p[i].at, p[i].bt,
+            p[i].ct, p[i].tat, p[i].wt);
     }
 
-    avg_wt = (float)total_wt / n;
-    avg_tat = (float)total_tat / n;
+    printf("\nAverage TAT = %.2f", sumTAT / n);
+    printf("\nAverage WT  = %.2f\n", sumWT / n);
 
-    printf("\nAverage Waiting Time = %.2f", avg_wt);
-    printf("\nAverage Turnaround Time = %.2f\n", avg_tat);
+
+    printf("\n--- Gantt Chart ---\n ");
+    
+    int gantt_time = 0;
+    
+    // 1. Print Top Timeline Bar
+    for(int i = 0; i < n; i++){
+        int start_time = p[i].ct - p[i].bt; 
+        
+        if(gantt_time < start_time){
+            printf("| IDLE "); 
+            gantt_time = start_time;
+        }
+        printf("|  P%d  ", p[i].pid);
+        gantt_time = p[i].ct;
+    }
+    printf("|\n "); 
+
+    // 2. Print Bottom Time Markers
+    gantt_time = 0;
+    for(int i = 0; i < n; i++){
+        int start_time = p[i].ct - p[i].bt;
+        
+        if(gantt_time < start_time){
+            printf("%-7d", gantt_time); 
+            gantt_time = start_time;
+        }
+        printf("%-7d", gantt_time); 
+        gantt_time = p[i].ct;
+    }
+    printf("%d\n\n", gantt_time); 
 
     return 0;
 }
