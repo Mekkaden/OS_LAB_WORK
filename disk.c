@@ -2,7 +2,20 @@
 #include <stdlib.h>
 #include <time.h>
 
-// 1. SSTF: Find closest unvisited track
+// 1. FCFS: Process requests exactly as they arrive (Unsorted)
+void FCFS(int req[], int n, int head) {
+    int total = 0;
+    
+    printf("\nFCFS Order: %d", head);
+    for(int i = 0; i < n; i++) {
+        total += abs(head - req[i]);
+        head = req[i];
+        printf(" -> %d", head);
+    }
+    printf("\nTotal Head Movement (FCFS): %d\n", total);
+}
+
+// 2. SSTF: Find closest unvisited track
 void SSTF(int req[], int n, int head) {
     int visited[100] = {0}, total = 0;
     
@@ -24,7 +37,37 @@ void SSTF(int req[], int n, int head) {
     printf("\nTotal Head Movement (SSTF): %d\n", total);
 }
 
-// 2. LOOK: Go right to highest request, then reverse left
+// 3. SCAN: Go right, hit the absolute boundary wall, then reverse left
+void SCAN(int req[], int n, int head, int disk_size) {
+    int total = 0, start = head;
+    
+    printf("\nSCAN Order: %d", head);
+    // Move Right
+    for(int i = 0; i < n; i++) {
+        if(req[i] >= start) {
+            total += abs(head - req[i]);
+            head = req[i];
+            printf(" -> %d", head);
+        }
+    }
+    
+    // Force physical head to hit the absolute end boundary wall
+    total += abs(head - (disk_size - 1));
+    head = disk_size - 1;
+    printf(" -> %d", head);
+    
+    // Move Left
+    for(int i = n - 1; i >= 0; i--) {
+        if(req[i] < start) {
+            total += abs(head - req[i]);
+            head = req[i];
+            printf(" -> %d", head);
+        }
+    }
+    printf("\nTotal Head Movement (SCAN): %d\n", total);
+}
+
+// 4. LOOK: Go right to highest request, then reverse left immediately
 void LOOK(int req[], int n, int head) {
     int total = 0, start = head;
     
@@ -48,7 +91,7 @@ void LOOK(int req[], int n, int head) {
     printf("\nTotal Head Movement (LOOK): %d\n", total);
 }
 
-// 3. CSCAN: Go right to disk end, wrap to 0, continue right
+// 5. CSCAN: Go right to disk end, wrap to 0, continue right
 void CSCAN(int req[], int n, int head, int disk_size) {
     int total = 0, start = head;
     
@@ -94,9 +137,12 @@ int main(void) {
     printf("Generated Request Queue: ");
     for(int i = 0; i < n; i++) {
         req[i] = rand() % disk_size; 
-        printf("%d ", req[i]); // Prints out the raw queue for the teacher
+        printf("%d ", req[i]); 
     }
     printf("\n");
+
+    // 1. Run FCFS FIRST while the array is still completely unsorted
+    FCFS(req, n, head);
 
     // --- THE MAGIC TRICK: Sort the array ONCE right here ---
     for(int i = 0; i < n - 1; i++) {
@@ -109,8 +155,9 @@ int main(void) {
         }
     }
 
-    // Call the algorithms
+    // 2. Run the remaining sorted-dependent bad boys
     SSTF(req, n, head);
+    SCAN(req, n, head, disk_size);
     LOOK(req, n, head);
     CSCAN(req, n, head, disk_size);
 
