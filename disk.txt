@@ -1,0 +1,55 @@
+====================================================================
+MAIN PROGRAM (INITIALIZATION AND SETUP)
+====================================================================
+Step 1: Start.
+Step 2: Read the number of requests (n) and the initial head position (head).
+Step 3: Seed the random number generator using srand(time(NULL)).
+Step 4: Generate n random requests using the formula (rand() % disk_size), store them in an array req[], and print the raw requests.
+Step 5: Sort the req[] array in ascending order using Bubble Sort to simplify the LOOK and CSCAN operations.
+Step 6: Call the independent functions: SSTF(req, n, head), LOOK(req, n, head), and CSCAN(req, n, head, disk_size).
+Step 7: Stop.
+
+
+====================================================================
+1. SSTF (SHORTEST SEEK TIME FIRST) ALGORITHM
+====================================================================
+Step 1: Initialize a visited[] array to 0 for all elements and set total_head_movement = 0.
+Step 2: Loop n times to process all request tracks:
+        a) Set the minimum distance tracker min_dist = 99999 and target index idx = -1.
+        b) Run an inner loop to traverse the track array from j = 0 to n - 1.
+        c) If a request is unvisited (visited[j] == 0), calculate its absolute distance from the current head: dist = abs(head - req[j]).
+        d) If dist < min_dist, update min_dist = dist and set idx = j.
+        e) After checking all tracks, mark the closest track as processed: visited[idx] = 1.
+        f) Accumulate the distance: total_head_movement += min_dist.
+        g) Move the physical disk head to the request track: head = req[idx] and print the track number.
+Step 3: Display the calculated total_head_movement value.
+
+
+====================================================================
+2. LOOK ALGORITHM
+====================================================================
+Step 1: Set total_head_movement = 0 and save the initial head location in a temporary variable start = head.
+Step 2: Print the initial head position to start the path sequence.
+Step 3: MOVE RIGHT: Traverse the sorted request array from index i = 0 to n - 1. If a track request is greater than or equal to start:
+        a) Add the absolute distance to the total: total_head_movement += abs(head - req[i]).
+        b) Update the head position: head = req[i] and print it.
+Step 4: MOVE LEFT: Reverse direction and traverse the sorted array backwards from index i = n - 1 down to 0. If a track request is strictly less than start:
+        a) Add the absolute distance to the total: total_head_movement += abs(head - req[i]).
+        b) Update the head position: head = req[i] and print it.
+Step 5: Display the calculated total_head_movement value.
+
+
+====================================================================
+3. CSCAN (CIRCULAR SCAN) ALGORITHM
+====================================================================
+Step 1: Set total_head_movement = 0 and save the initial head location in a temporary variable start = head.
+Step 2: Print the initial head position to start the path sequence.
+Step 3: MOVE RIGHT TO HIGHEST REQUEST: Traverse the sorted request array from index i = 0 to n - 1. If a track request is greater than or equal to start:
+        a) Add the absolute distance to the total: total_head_movement += abs(head - req[i]).
+        b) Update the head position: head = req[i] and print it.
+Step 4: JUMP TO DISK EDGE: Force the head to complete its path to the maximum boundary of the disk. Add the distance to the total: total_head_movement += abs(head - (disk_size - 1)) and set head = disk_size - 1.
+Step 5: CIRCULAR WRAP-AROUND: Instantly reset the head position to track 0. Add the wrap-around distance to the total: total_head_movement += (disk_size - 1). Print the boundary transition (-> disk_size - 1 -> 0) and set head = 0.
+Step 6: CONTINUE RIGHT FROM TRACK 0: Traverse the sorted request array again from index i = 0 to n - 1. If a track request is strictly less than start:
+        a) Add the absolute distance to the total: total_head_movement += abs(head - req[i]).
+        b) Update the head position: head = req[i] and print it.
+Step 7: Display the calculated total_head_movement value.
