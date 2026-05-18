@@ -121,6 +121,30 @@ void CSCAN(int req[], int n, int head, int disk_size) {
     printf("\nTotal Head Movement (CSCAN): %d\n", total);
 }
 
+// 6. CLOOK: Go right to highest request, wrap straight to lowest request, continue right
+void CLOOK(int req[], int n, int head) {
+    int total = 0, start = head;
+    
+    printf("\nCLOOK Order: %d", head);
+    // Move Right to the largest request
+    for(int i = 0; i < n; i++) {
+        if(req[i] >= start) {
+            total += abs(head - req[i]);
+            head = req[i];
+            printf(" -> %d", head);
+        }
+    }
+    // Wrap around directly to the lowest request and continue Right
+    for(int i = 0; i < n; i++) {
+        if(req[i] < start) {
+            total += abs(head - req[i]);
+            head = req[i];
+            printf(" -> %d", head);
+        }
+    }
+    printf("\nTotal Head Movement (CLOOK): %d\n", total);
+}
+
 int main(void) {
     int n, head, disk_size = 5000; 
     
@@ -160,6 +184,7 @@ int main(void) {
     SCAN(req, n, head, disk_size);
     LOOK(req, n, head);
     CSCAN(req, n, head, disk_size);
+    CLOOK(req, n, head);
 
     return 0;
 }
