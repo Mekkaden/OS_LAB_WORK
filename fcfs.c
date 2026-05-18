@@ -60,8 +60,6 @@ int main(void){
     float avgwt = totalwt / n;
     float avgtat = totaltat /n;
 
-
-
     printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
 
     for(int i = 0; i < n; i++){
@@ -78,6 +76,35 @@ int main(void){
     printf("\nAverage TAT Time = %.2f\n", avgtat);
 
 
+    // --- GANTT CHART PRINTING ---
+    // We loop twice: First for the process blocks, second for the time markers.
+    printf("\n--- Gantt Chart ---\n ");
+    
+    int gantt_time = 0;
+    
+    // 1. Print Top Timeline Bar
+    for(int i = 0; i < n; i++){
+        if(gantt_time < p[i].at){
+            printf("| IDLE "); // CPU was idle
+            gantt_time = p[i].at;
+        }
+        printf("|  P%d  ", p[i].pid);
+        gantt_time = p[i].ct;
+    }
+    printf("|\n "); // Close the final block
+
+    // 2. Print Bottom Time Markers
+    gantt_time = 0;
+    for(int i = 0; i < n; i++){
+        if(gantt_time < p[i].at){
+            printf("%-7d", gantt_time); // %-7d aligns the number perfectly under "| IDLE "
+            gantt_time = p[i].at;
+        }
+        printf("%-7d", gantt_time); // %-7d aligns the number perfectly under "|  Px  "
+        gantt_time = p[i].ct;
+    }
+    printf("%d\n\n", gantt_time); // Print the final completion time at the very end
+
 
     return 0;
 }
@@ -89,6 +116,3 @@ int main(void){
 
 //tat = ct - at; //time from queue - finish
 //wt = tat - bt //time from out of queue - finish
-
-
-

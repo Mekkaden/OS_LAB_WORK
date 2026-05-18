@@ -1,1 +1,0 @@
-char * arg[] ={"./myadder",argv[1],argv[2],null}
