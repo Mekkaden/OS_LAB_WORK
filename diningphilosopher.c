@@ -45,7 +45,7 @@ void* philosopher(void* arg) {
 
 int main() {
     pthread_t tid[5];
-    int phil[5];
+    int id[5]; // Renamed the array here
 
     // Initialize room (value 4 to prevent deadlock) and mutex (value 1)
     sem_init(&room, 0, 4);
@@ -58,8 +58,8 @@ int main() {
 
     // Create philosopher threads and pass their IDs safely
     for (int i = 0; i < 5; i++) {
-        phil[i] = i;
-        pthread_create(&tid[i], NULL, philosopher, &phil[i]); 
+        id[i] = i; // Assigning to the new array name
+        pthread_create(&tid[i], NULL, philosopher, &id[i]); // Passing the new array name
     }
 
     // Join threads to block main and keep the simulation running infinitely
