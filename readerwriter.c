@@ -2,7 +2,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
-#define N 5
 // sem_t is used to define a semaphore 
 sem_t mutex;      // protects read_count
 sem_t rw_mutex;   // protects shared resource
@@ -61,8 +60,8 @@ void *writer(void *arg) {
 }
 
 int main() {
-    pthread_t r[N], w[N];
-    int id[N];
+    pthread_t r[5], w[5];
+    int id[5];
 
     sem_init(&mutex, 0, 1);
     sem_init(&rw_mutex, 0, 1);
@@ -70,13 +69,13 @@ int main() {
 
     //this loop creates n reader and writer threads
 
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < 5; i++) {
         id[i] = i + 1;
         pthread_create(&r[i], NULL, reader, &id[i]);    
         pthread_create(&w[i], NULL, writer, &id[i]);
     }
 
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < 5; i++) {
         pthread_join(r[i], NULL);
         pthread_join(w[i], NULL);
     }
