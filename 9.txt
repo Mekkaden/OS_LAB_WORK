@@ -1,3 +1,0 @@
-In priority theres done array
-In RR theres visited array
-In Priority - preemptive & srtf we re intialzing rt = bt

@@ -44,8 +44,7 @@ void* philosopher(void* arg) {
 }
 
 int main() {
-    pthread_t tid[5];
-    int id[5]; // Renamed the array here
+   
 
     // Initialize room (value 4 to prevent deadlock) and mutex (value 1)
     sem_init(&room, 0, 4);
@@ -55,6 +54,9 @@ int main() {
     for (int i = 0; i < 5; i++) {
         sem_init(&chopstick[i], 0, 1); 
     }
+
+     pthread_t tid[5];
+    int id[5]; // Renamed the array here
 
     // Create philosopher threads and pass their IDs safely
     for (int i = 0; i < 5; i++) {

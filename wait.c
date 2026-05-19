@@ -21,6 +21,8 @@ int main()
     else
     {
         wait(NULL);
+        //When the Parent process hits that line of code, it completely freezes its own execution. 
+        //It goes to sleep and tells the Operating System: "Do not wake me up until my Child process has finished executing and is completely dead."
         printf("Parent Process\n");
         printf("OS lab\n");
     }

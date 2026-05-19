@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
         // Step 5: Prepare argument list for execvp()
         // Format → program_name arg1 arg2 NULL
-        char *arg[] = {"./myadder", argv[1], argv[2], NULL};
+        char *arg[] = {"./myadder", argv[1], argv[2], NULL}; //read stuff until it hits a null
 
         // Step 6: Replace child process with myadder program
         execvp(arg[0], arg);

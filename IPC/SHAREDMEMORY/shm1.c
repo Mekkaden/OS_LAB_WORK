@@ -15,7 +15,7 @@ struct data{
 };
 
 // Step 2: Function to flip case of characters in the final string
-void flipcase(char *str){
+void flipcase(char str[]){
     for(int i=0;i<strlen(str);i++){
         if(isupper(str[i]))
             str[i]=tolower(str[i]);

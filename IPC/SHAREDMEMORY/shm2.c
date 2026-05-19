@@ -17,7 +17,7 @@ int main(){
     int shmid = shmget(key, sizeof(struct data), 0666 | IPC_CREAT);
 
     if(shmid < 0){
-        perror("shmget failed. Run process 1 first.");
+        perror("shmget failed");
         return 1;
     }
 

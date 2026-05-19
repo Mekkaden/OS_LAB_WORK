@@ -11,7 +11,7 @@ int main() {
     printf("Enter values of a b and c: ");
     scanf("%d %d %d", &a, &b, &c);
 
-    pipe(fd);
+    pipe(fd); //fd means file desc..... , u can use any name bro its not an issue!
 
     pid_t pid = fork();
 
