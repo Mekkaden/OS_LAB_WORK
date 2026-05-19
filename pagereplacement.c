@@ -2,201 +2,137 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAX 100
-#define FRAME_MAX 10
-
-int ref[MAX];
-
-// print frames
-void print(int frame[], int f){
+void display(int frame[], int f) {
     for(int i = 0; i < f; i++) {
-        if(frame[i] == -1)
-            printf("- ");
-        else
-            printf("%d ", frame[i]);
+        if(frame[i] == -1) printf("- ");
+        else printf("%d ", frame[i]);
     }
 }
 
-// FIFO
-void fifo(int n, int f){
-    int frame[FRAME_MAX], i, j = 0, fault = 0;
+// 1. FIFO: Replace the oldest page using a circular pointer
+void FIFO(int ref[], int n, int f) {
+    int frame[10], ptr = 0, fault = 0;
+    for(int i = 0; i < f; i++) frame[i] = -1;
 
-    for(i = 0; i < f; i++) frame[i] = -1;
-
-    printf("\nFIFO:\nPage\tFrames\tStatus\n");
-
-    for(i = 0; i < n; i++){
+    printf("\n--- FIFO ---\nPage\tFrames\t\tStatus\n");
+    for(int i = 0; i < n; i++) {
         int hit = 0;
-
-        for(int k = 0; k < f; k++){
-            if(frame[k] == ref[i]){
-                hit = 1;
-                break;
-            }
+        for(int j = 0; j < f; j++) {
+            if(frame[j] == ref[i]) { hit = 1; break; }
         }
 
         printf("%d\t", ref[i]);
-
-        if(!hit){
-            frame[j] = ref[i];
-            j = (j + 1) % f;
+        if(hit == 0) {
+            frame[ptr] = ref[i];
+            ptr = (ptr + 1) % f; // Circular queue math
             fault++;
-
-            print(frame, f);
-            printf("\tFault");
+            display(frame, f);
+            printf("\tFault\n");
         } else {
-            print(frame, f);
-            printf("\tHit");
+            display(frame, f);
+            printf("\tHit\n");
         }
-        printf("\n");
     }
     printf("Total Faults = %d\n", fault);
 }
 
-// LRU
-void lru(int n, int f){
-    int frame[FRAME_MAX], time[FRAME_MAX];
-    int i, fault = 0, c = 0;
+// 2. LRU: Replace the page that hasn't been used in the longest time
+void LRU(int ref[], int n, int f) {
+    int frame[10], time[10], clock = 0, fault = 0;
+    for(int i = 0; i < f; i++) { frame[i] = -1; time[i] = 0; }
 
-    for(i = 0; i < f; i++){
-        frame[i] = -1;
-        time[i] = 0;
-    }
-
-    printf("\nLRU:\nPage\tFrames\tStatus\n");
-
-    for(i = 0; i < n; i++){
-        int pos = -1;
-
-        for(int j = 0; j < f; j++){
-            if(frame[j] == ref[i]){
-                pos = j;
-                break;
-            }
+    printf("\n--- LRU ---\nPage\tFrames\t\tStatus\n");
+    for(int i = 0; i < n; i++) {
+        int hit = 0, pos = -1;
+        for(int j = 0; j < f; j++) {
+            if(frame[j] == ref[i]) { hit = 1; pos = j; break; }
         }
 
         printf("%d\t", ref[i]);
-
-        if(pos != -1){
-            time[pos] = ++c;
-            print(frame, f);
-            printf("\tHit");
+        if(hit == 1) {
+            time[pos] = ++clock; 
+            display(frame, f);
+            printf("\tHit\n");
         } else {
             int min = 0;
-
-            for(int j = 1; j < f; j++){
-                if(time[j] < time[min])
-                    min = j;
+            for(int j = 1; j < f; j++) {
+                if(time[j] < time[min]) min = j;
             }
-
             frame[min] = ref[i];
-            time[min] = ++c;
+            time[min] = ++clock; 
             fault++;
-
-            print(frame, f);
-            printf("\tFault");
+            display(frame, f);
+            printf("\tFault\n");
         }
-        printf("\n");
     }
     printf("Total Faults = %d\n", fault);
 }
 
-// Optimal
-void optimal(int n, int f){
-    int frame[FRAME_MAX], i, fault = 0;
+// 3. OPTIMAL: Replace the page that won't be used for the longest time in the future
+void OPTIMAL(int ref[], int n, int f) {
+    int frame[10], fault = 0;
+    for(int i = 0; i < f; i++) frame[i] = -1;
 
-    for(i = 0; i < f; i++) frame[i] = -1;
-
-    printf("\nOptimal:\nPage\tFrames\tStatus\n");
-
-    for(i = 0; i < n; i++){
+    printf("\n--- OPTIMAL ---\nPage\tFrames\t\tStatus\n");
+    for(int i = 0; i < n; i++) {
         int hit = 0;
-
-        for(int j = 0; j < f; j++){
-            if(frame[j] == ref[i]){
-                hit = 1;
-                break;
-            }
+        for(int j = 0; j < f; j++) {
+            if(frame[j] == ref[i]) { hit = 1; break; }
         }
 
         printf("%d\t", ref[i]);
-
-        if(hit){
-            print(frame, f);
+        if(hit == 1) {
+            display(frame, f);
             printf("\tHit\n");
-            continue;
-        }
-
-        int pos = -1;
-
-        // check empty frame
-        for(int j = 0; j < f; j++){
-            if(frame[j] == -1){
-                pos = j;
-                break;
-            }
-        }
-
-        // apply optimal if no empty frame
-        if(pos == -1){
-            int farthest = -1;
-
-            for(int j = 0; j < f; j++){
+        } else {
+            int pos = -1, farthest = -1;
+            for(int j = 0; j < f; j++) {
+                if(frame[j] == -1) { pos = j; break; } 
+                
                 int k;
-                for(k = i + 1; k < n; k++){
-                    if(frame[j] == ref[k])
-                        break;
+                for(k = i + 1; k < n; k++) {
+                    if(frame[j] == ref[k]) break;
                 }
-
-                if(k == n){
-                    pos = j;
-                    break;
-                }
-
-                if(k > farthest){
-                    farthest = k;
-                    pos = j;
-                }
+                
+                if(k == n) { pos = j; break; }
+                
+                if(k > farthest) { farthest = k; pos = j; }
             }
+            frame[pos] = ref[i];
+            fault++;
+            display(frame, f);
+            printf("\tFault\n");
         }
-
-        frame[pos] = ref[i];
-        fault++;
-
-        print(frame, f);
-        printf("\tFault\n");
     }
-
     printf("Total Faults = %d\n", fault);
 }
 
-// main
-int main(int argc, char *argv[]){
-    if(argc < 3){
-        printf("Usage: %s <length> <frames>\n", argv[0]);
-        return 1;
-    }
+int main(void) {
+    int n, f;
+    
+    printf("Enter number of pages (length of reference string): ");
+    if(scanf("%d", &n) != 1) return 1;
+    
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
 
-    int n = atoi(argv[1]);
-    int f = atoi(argv[2]);
-
-    if(n > MAX || f > FRAME_MAX){
-        printf("Error: Exceeds maximum limits.\n");
-        return 1;
-    }
-
-    srand(time(NULL));  // FIXED
-
-    printf("Reference String: ");
-    for(int i = 0; i < n; i++){
-        ref[i] = rand() % 10;
+    int ref[n];
+    
+    // ==========================================================
+    srand(time(NULL));
+    
+    printf("\nGenerated Reference String: ");
+    for(int i = 0; i < n; i++) {
+        ref[i] = rand() % 10; // Random pages from 0 to 9
         printf("%d ", ref[i]);
     }
     printf("\n");
+    // ==========================================================
 
-    fifo(n, f);
-    lru(n, f);
-    optimal(n, f);
+    // Call the bad boys
+    FIFO(ref, n, f);
+    LRU(ref, n, f);
+    OPTIMAL(ref, n, f);
 
     return 0;
 }
