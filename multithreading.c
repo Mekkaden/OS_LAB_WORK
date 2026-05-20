@@ -73,9 +73,9 @@ void *compute_stddev(void *arg) {
 
 // ---------- STEP 5: Thread function to compute Minimum ----------
 void *compute_min(void *arg) {
-    int min = numbers[0];
+    int min = 999;
 
-    for (int i = 1; i < count; i++) {
+    for (int i = 0; i < count; i++) {
         if (numbers[i] < min) {
             min = numbers[i];
         }
